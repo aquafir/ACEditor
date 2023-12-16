@@ -12,10 +12,11 @@
     <ProjectGuid>64a9be07-16ea-4ae3-abb9-f9b07fa65506</ProjectGuid>
     <RootNamespace>ACEditor</RootNamespace>
     <AssemblyName>ACEditor</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <None Include="PluginCore.cs" />
-    <None Include="ExampleUI.cs" />
+    <None Include="PropertyEditor.cs" />
     <Content Include="scripts\installer.nsi" />
     <Content Include="scripts\post-build.ps1" />
   </ItemGroup>

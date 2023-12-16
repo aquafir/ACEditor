@@ -27,11 +27,11 @@ public enum PropertyDataId : ushort
     ClothingBase = 7,
     
     Icon = 8,
-    [AssessmentProperty]
+    
     EyesTexture = 9,
-    [AssessmentProperty]
+    
     NoseTexture = 10,
-    [AssessmentProperty]
+    
     MouthTexture = 11,
     
     DefaultEyesTexture = 12,
@@ -39,11 +39,11 @@ public enum PropertyDataId : ushort
     DefaultNoseTexture = 13,
     
     DefaultMouthTexture = 14,
-    [AssessmentProperty]
+    
     HairPalette = 15,
-    [AssessmentProperty]
+    
     EyesPalette = 16,
-    [AssessmentProperty]
+    
     SkinPalette = 17,
     
     HeadObject = 18,

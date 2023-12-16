@@ -21,7 +21,6 @@ public enum PropertyString : ushort
     Template = 5,
     AttackersName = 6,
     Inscription = 7,
-    [Description("Scribe Name")]
     ScribeName = 8,
     VendorsName = 9,
     Fellowship = 10,
@@ -72,7 +71,6 @@ public enum PropertyString : ushort
     KillQuest3 = 50,
     UseSendsSignal = 51,
 
-    [Description("Gear Plating Name")]
     GearPlatingName = 52,
 
     

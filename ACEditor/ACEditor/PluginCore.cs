@@ -13,7 +13,7 @@ namespace ACEditor;
 [FriendlyName("ACEditor")]
 public class PluginCore : PluginBase
 {
-    private ExampleUI ui;
+    private PropertyEditor ui;
 
     /// <summary>
     /// Assembly directory containing the plugin dll
@@ -34,7 +34,7 @@ public class PluginCore : PluginBase
             // this adds text to the chatbox. it's output is local only, other players do not see this.
             CoreManager.Current.Actions.AddChatText($"This is my new decal plugin. Startup was called. $ext_custommessage$", 1);
 
-            ui = new ExampleUI();
+            ui = new PropertyEditor();
         }
         catch (Exception ex)
         {
