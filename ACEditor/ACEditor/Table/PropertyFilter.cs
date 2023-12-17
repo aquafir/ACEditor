@@ -101,7 +101,7 @@ public class PropertyFilter
             Props = Props.Where(x => regex.IsMatch(x)).ToArray();
         }
 
-        C.Chat("Filter changed");
+        //C.Chat("Filter changed");
     }
 
     internal void SetTarget(PropertyData target)

@@ -29,6 +29,8 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Linq.Expressions;
 using ACEditor.Table;
+using Decal.Adapter.Wrappers;
+using WorldObject = UtilityBelt.Scripting.Interop.WorldObject;
 
 namespace ACEditor;
 internal class PropertyEditor : IDisposable
@@ -36,13 +38,16 @@ internal class PropertyEditor : IDisposable
     /// <summary>
     /// The UBService Hud
     /// </summary>
-    readonly Hud hud;
+    readonly UtilityBelt.Service.Views.Hud hud;
     readonly Game game = new();
     readonly List<PropertyTable> propTables = new()
     {
         new (PropType.PropertyInt),
+        new (PropType.PropertyInt64),
         new (PropType.PropertyFloat),
         new (PropType.PropertyString),
+        new (PropType.PropertyDataId),
+        new (PropType.PropertyInstanceId),
     };
 
     /// <summary>
@@ -60,7 +65,8 @@ internal class PropertyEditor : IDisposable
         hud = UBService.Huds.CreateHud("ACEditor");
 
         hud.Visible = true;
-        hud.WindowSettings = ImGuiWindowFlags.AlwaysAutoResize;
+        
+        //hud.WindowSettings = ImGuiWindowFlags.AlwaysAutoResize;
 
         // set to show our icon in the UBService HudBar
         hud.ShowInBar = true;
@@ -74,13 +80,12 @@ internal class PropertyEditor : IDisposable
 
     private Task OnSelected(object sender, UtilityBelt.Scripting.Events.ObjectSelectedEventArgs e)
     {
+        return Task.CompletedTask;
         var wo = game.World.Get(e.ObjectId);
 
         if (wo is null)
             return Task.CompletedTask;
 
-
-        C.Chat($"Selected {e.ObjectId} - {wo.Name}");
         SetTarget(wo);
 
         return Task.CompletedTask;
@@ -108,7 +113,12 @@ internal class PropertyEditor : IDisposable
     {
         try
         {
+            DrawMenu();
+
+            //ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 300), ImGuiCond.FirstUseEver);
+            ImGui.BeginChild("Editor");
             DrawTabBar();
+            ImGui.EndChild();
         }
         catch (Exception ex)
         {
@@ -116,15 +126,33 @@ internal class PropertyEditor : IDisposable
         }
     }
 
-    private void DrawTabBar()
+    private void DrawMenu()
     {
         //Draw each table as a tab
+        if (ImGui.Button("Selected"))
+        {
+            if (game.World.Selected != null)
+                SetTarget(game.World.Selected);
+            else
+                C.Chat("No WorldObject selected!");
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Save"))
+        {
+            C.Chat("Todo!");
+        }
+        ImGui.Separator();
+
+    }
+
+    private void DrawTabBar()
+    {
         if (ImGui.BeginTabBar("PropertyTab"))
         {
             //ImGui.Text($"Tabs: {propTables.Count}");
             foreach (var table in propTables)
             {
-                if (ImGui.BeginTabItem($"{table.Type}"))
+                if (ImGui.BeginTabItem($"{table.Name}"))
                 {
                    // ImGui.Text($"Testing {table.Type}");
 
@@ -139,6 +167,16 @@ internal class PropertyEditor : IDisposable
 
     public void Dispose()
     {
-        hud.Dispose();
+        try
+        {
+            game.World.OnObjectSelected -= OnSelected;
+            //hud.OnRender -= Hud_OnRender;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+        hud?.Dispose();
     }
 }
