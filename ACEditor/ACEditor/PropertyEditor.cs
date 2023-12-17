@@ -52,7 +52,7 @@ internal class PropertyEditor : IDisposable
     /// <summary>
     /// Current version of property data
     /// </summary>
-    PropertyData Current = new();
+    //PropertyData Current = new();
 
     public PropertyEditor()
     {
@@ -79,19 +79,25 @@ internal class PropertyEditor : IDisposable
         if (wo is null)
             return Task.CompletedTask;
 
-        
-        C.Chat($"Selected {e.ObjectId} - {wo.Name}");
 
+        C.Chat($"Selected {e.ObjectId} - {wo.Name}");
+        SetTarget(wo);
+
+        return Task.CompletedTask;
+    }
+
+    //Change the target being edited
+    private void SetTarget(WorldObject wo)
+    {
         //Clone WO
         Original = new PropertyData(wo);
-        Current = new PropertyData(wo);
+        C.Chat($"Target now: {wo.Name}");
+        //Current = new PropertyData(wo);
 
         foreach (var table in propTables)
         {
-            table.SetTarget(Current);
+            table.SetTarget(Original);
         }
-
-        return Task.CompletedTask;
     }
 
 
@@ -115,12 +121,12 @@ internal class PropertyEditor : IDisposable
         //Draw each table as a tab
         if (ImGui.BeginTabBar("PropertyTab"))
         {
-            ImGui.Text($"Tabs: {propTables.Count}");
+            //ImGui.Text($"Tabs: {propTables.Count}");
             foreach (var table in propTables)
             {
                 if (ImGui.BeginTabItem($"{table.Type}"))
                 {
-                    ImGui.Text($"Testing {table.Type}");
+                   // ImGui.Text($"Testing {table.Type}");
 
                     table.Render();
 

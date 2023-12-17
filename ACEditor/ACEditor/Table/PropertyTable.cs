@@ -1,8 +1,12 @@
-﻿using ACE.Server.WorldObjects;
+﻿using ACE.Server.Entity;
+using ACE.Server.WorldObjects;
 using ACEditor.Props;
+using Decal.Adapter.Wrappers;
+using Hellosam.Net.Collections;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UtilityBelt.Scripting.Interop;
 using WorldObject = UtilityBelt.Scripting.Interop.WorldObject;
@@ -23,7 +27,7 @@ public class PropertyTable
 
     #region Members
     PropertyData Target;
-    public PropertyFilter filter;
+    public PropertyFilter Filter;
 
     public PropType Type { get; set; }
 
@@ -32,25 +36,66 @@ public class PropertyTable
     //List<PropertyFilter> filters = new();
 
     //Data for the table
-    public TableRow[] tableData = new TableRow[]
-    {
-
-    };
+    //public List<TableRow> tableData = new ();
+    public TableRow[] tableData = new TableRow[0];
 
     #endregion
 
     public PropertyTable(PropType type)
     {
         Type = type;
-        filter = new(type);
-        filter?.UpdateFilter();
+
+        //Setup filter
+        Filter = new(type);
+        Filter?.UpdateFilter();
+
+        //Build table data
+        UpdateTable();
+    }
+
+    public void UpdateTable()
+    {
+        //Get keys from filter
+        //tableData.Clear();
+        tableData = new TableRow[Filter.Props.Length];
+
+        //Todo: how to preserve existing edit data
+
+        //For each filtered property...
+        for (var i = 0; i < Filter.Props.Length; i++)
+        {
+            //Try to find the value corresponding to the Type if it exists in the Target
+            var name = Filter.Props[i];
+            var key = Filter.PropKeys[i];
+            if (!Type.TryGetValue(key, Target, out var val))
+                continue;
+
+            //Add it to the table
+            tableData[i] = new()
+            {
+                Key = key,
+                Property = name,
+                OriginalValue = val,
+                CurrentValue = val,
+            };
+
+            //tableData.Add(new()
+            //{
+            //    Key = key,
+            //    Property = name,
+            //    OriginalValue = val,
+            //    CurrentValue = val,
+            //});
+        }
     }
 
     public void SetTarget(PropertyData target)
     {
         //Todo: clone?
         this.Target = target;
-        filter?.SetTarget(target);
+        Filter?.SetTarget(target);
+
+        UpdateTable();
     }
 
     //Sort table based on column/direction
@@ -81,20 +126,35 @@ public class PropertyTable
 
     public void Render()
     {
-        filter.Render();
-        if(filter.Changed)
+        if (Target is null || tableData.Length == 0)
         {
+            //ImGui.Text($"{Type} - {Filter.Props.Length} - {tableData.Length}");
+            return;
 
         }
 
-        if (ImGui.BeginTable($"{Type}", 2, TABLE_FLAGS))
+        Filter.Render();
+        if (Filter.Changed)
+        {
+            UpdateTable();
+        }
+
+        //return;
+
+        if (ImGui.BeginTable("MyTable", 4, TABLE_FLAGS))
         {
             // Set up columns
-            int columnIndex = 0;
-            ImGui.TableSetupColumn($"Column {columnIndex}", ImGuiTableColumnFlags.DefaultSort, 50, (uint)columnIndex++);
+            uint columnIndex = 0;
+            //ImGui.TableSetupColumn($"Key", ImGuiTableColumnFlags.DefaultHide, 50, columnIndex++);
+            ImGui.TableSetupColumn($"Key");
+            ImGui.TableSetupColumn($"Prop");
+            ImGui.TableSetupColumn($"Value");
+            ImGui.TableSetupColumn($"New Value");
+
+
+            //, ImGuiTableColumnFlags.DefaultSort | ImGuiTableColumnFlags, 50, (uint)columnIndex++);
 
             //ImGui::PushItemWidth(-ImGui::GetContentRegionAvail().x * 0.5f);
-
             // Headers row
             ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableHeadersRow();
@@ -107,48 +167,29 @@ public class PropertyTable
                 ImGui.TableNextRow();
 
                 ImGui.TableNextColumn();
-                //ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X * .33f);
-                ImGui.Text($"{tableData[i].Property}");
-                ImGui.PopItemWidth();
+                ImGui.Text($"{tableData[i].Key}");
 
-                if (ImGui.BeginPopupContextItem())
-                {
-                    if (ImGui.MenuItem("Test123"))
-                        Console.WriteLine("Clicked");
-                    ImGui.EndPopup();
-                }
+                ImGui.TableNextColumn();
+                ImGui.Text($"{tableData[i].Property}");
+
+                //if (ImGui.BeginPopupContextItem())
+                //{
+                //    if (ImGui.MenuItem("Test123"))
+                //        Console.WriteLine("Clicked");
+                //    ImGui.EndPopup();
+                //}
 
                 ImGui.TableNextColumn();
                 ImGui.Text($"{tableData[i].OriginalValue}");
 
-                //ImGui.TableNextColumn();
-                //ImGui.Text($"{tableData[i].Value}");
+                ImGui.TableNextColumn();
+                ImGui.InputText($"###{Type}{i}", ref tableData[i].CurrentValue, 300);
+                
+                //ImGui.Text($"{tableData[i].CurrentValue}");
             }
-
-            //for (int i = 0; i < tableData.Length; i++)
-            //{
-            //    ImGui.TableNextRow();
-
-            //    ImGui.TableNextColumn();
-            //    //ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X * .33f);
-            //    ImGui.Text($"{tableData[i].Property}");
-            //    ImGui.PopItemWidth();
-
-            //    if (ImGui.BeginPopupContextItem())
-            //    {
-            //        if (ImGui.MenuItem("Test123"))
-            //            Console.WriteLine("Clicked");
-            //        ImGui.EndPopup();
-            //    }
-
-            //    ImGui.TableNextColumn();
-            //    ImGui.Text($"{tableData[i].OriginalValue}");
-
-            //    //ImGui.TableNextColumn();
-            //    //ImGui.Text($"{tableData[i].Value}");
-            //}
 
             ImGui.EndTable();
         }
+
     }
 }

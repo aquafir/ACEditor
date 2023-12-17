@@ -34,7 +34,10 @@ public class PropertyFilter
     public int SelectedIndex = 0;
     public string Selection => SelectedIndex < Props.Length ? Props[SelectedIndex] : null;
 
+    //Name of Property Enum keys
     public string[] Props { get; set; } = new string[0];
+    //Value of Property Enum
+    public int[] PropKeys { get; set; } = new int[0];
 
     public string FilterText = "";
 
@@ -88,6 +91,7 @@ public class PropertyFilter
 
         //Get Target props
         Props = Target is null || IncludeMissing ? Type.GetProps() : Type.GetProps(Target);
+        PropKeys = Target is null || IncludeMissing ? Type.GetPropKeys() : Type.GetPropKeys(Target);
 
         //Apply filter
         if (!string.IsNullOrWhiteSpace(FilterText))

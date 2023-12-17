@@ -10,6 +10,7 @@ public class PropertyData
     public uint Id { get; set; }
     public string Name { get; set; }
 
+    //Todo: should I make these observable?
     public Dictionary<IntId, int> IntValues { get; set;  } = new();
     public Dictionary<Int64Id, long> Int64Values { get; set;  } = new();
     public Dictionary<StringId, string> StringValues { get; set;  } = new();
