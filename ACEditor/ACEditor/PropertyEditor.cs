@@ -29,6 +29,8 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Linq.Expressions;
 using ACEditor.Table;
+using Decal.Adapter.Wrappers;
+using WorldObject = UtilityBelt.Scripting.Interop.WorldObject;
 
 namespace ACEditor;
 internal class PropertyEditor : IDisposable
@@ -36,13 +38,16 @@ internal class PropertyEditor : IDisposable
     /// <summary>
     /// The UBService Hud
     /// </summary>
-    readonly Hud hud;
+    readonly UtilityBelt.Service.Views.Hud hud;
     readonly Game game = new();
     readonly List<PropertyTable> propTables = new()
     {
         new (PropType.PropertyInt),
+        new (PropType.PropertyInt64),
         new (PropType.PropertyFloat),
         new (PropType.PropertyString),
+        new (PropType.PropertyDataId),
+        new (PropType.PropertyInstanceId),
     };
 
     /// <summary>
@@ -79,8 +84,6 @@ internal class PropertyEditor : IDisposable
         if (wo is null)
             return Task.CompletedTask;
 
-
-        C.Chat($"Selected {e.ObjectId} - {wo.Name}");
         SetTarget(wo);
 
         return Task.CompletedTask;
@@ -124,7 +127,7 @@ internal class PropertyEditor : IDisposable
             //ImGui.Text($"Tabs: {propTables.Count}");
             foreach (var table in propTables)
             {
-                if (ImGui.BeginTabItem($"{table.Type}"))
+                if (ImGui.BeginTabItem($"{table.Name}"))
                 {
                    // ImGui.Text($"Testing {table.Type}");
 
@@ -139,6 +142,16 @@ internal class PropertyEditor : IDisposable
 
     public void Dispose()
     {
-        hud.Dispose();
+        try
+        {
+            game.World.OnObjectSelected -= OnSelected;
+            //hud.OnRender -= Hud_OnRender;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+        hud?.Dispose();
     }
 }
